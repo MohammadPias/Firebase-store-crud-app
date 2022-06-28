@@ -1,22 +1,27 @@
 import { async } from '@firebase/util';
-import React, { useState } from 'react';
-import CourseService from '../Firebase/firebaseServicve'
+import React, { useEffect, useState } from 'react';
+import CourseService from '../Firebase/firebaseService'
 
-const AddCourse = () => {
+const AddCourse = ({ courses, setCourses }) => {
     const [formData, setFormData] = useState({
-        title: null,
-        instructor: null,
-        status: null,
+        title: '',
+        instructor: '',
+        status: '',
     });
     const [message, setMessage] = useState({
         error: false,
         body: '',
     })
-    console.log(formData);
+
+    const fetchCourses = async () => {
+        const allCourses = await CourseService.getAllCourses();
+        setCourses(allCourses?.docs?.map(item => ({ ...item.data(), id: item.id })))
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData?.title === null || formData?.instructor === null || formData?.status === null) {
+        if (formData?.title === '' || formData?.instructor === '' || formData?.status === '') {
             // alert('All form required.');
             setMessage({
                 error: true,
@@ -30,25 +35,28 @@ const AddCourse = () => {
                     error: false,
                     body: 'Course added successfully.'
                 })
+                fetchCourses()
+                setFormData({
+                    title: '',
+                    instructor: '',
+                    status: '',
+                })
             }
             catch (error) {
 
             }
         }
     }
+    console.log(message.error)
     return (
         <div className='mt-5'>
             <form onSubmit={handleSubmit} className='mx-auto w-2/3 p-5 shadow-md rounded-md'>
                 <div>
                     {
-                        message.error ?
-                            <div className='bg-amber-50 py-1.5'>
-                                <h3 className="text-center font-medium text-sm text-red-500">{message.body}</h3>
-                            </div>
-                            :
-                            <div className='bg-green-50 py-1.5'>
-                                <h3 className=" text-center font-medium text-sm text-green-500">{message.body}</h3>
-                            </div>
+                        message.body !== '' &&
+                        <div className={message.error ? 'bg-amber-50 py-2' : 'bg-green-50 py-2'}>
+                            <h3 className={`text-center font-medium text-sm ${message.error ? 'text-red-500' : 'text-green-500'}`}>{message.body}</h3>
+                        </div>
                     }
                 </div>
                 <div className='mt-3'>
@@ -56,7 +64,7 @@ const AddCourse = () => {
                     <br />
                     <input
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
-                        defaultValue={formData?.title}
+                        value={formData?.title}
                         className='w-full py-1 focus:outline-8 outline-offset-2 outline-cyan-200 rounded-sm px-5 text-gray-500'
                         type="text"
                         id='title'
@@ -67,7 +75,7 @@ const AddCourse = () => {
                     <br />
                     <input
                         onChange={e => setFormData({ ...formData, instructor: e.target.value })}
-                        defaultValue={formData?.instructor}
+                        value={formData?.instructor}
                         className='w-full py-1 focus:outline-8 outline-offset-2 outline-cyan-200 rounded-sm px-5 text-gray-500'
                         type="text"
                         id='instructor'

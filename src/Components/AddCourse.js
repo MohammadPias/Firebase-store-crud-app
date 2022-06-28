@@ -2,12 +2,8 @@ import { async } from '@firebase/util';
 import React, { useEffect, useState } from 'react';
 import CourseService from '../Firebase/firebaseService'
 
-const AddCourse = ({ courses, setCourses }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        instructor: '',
-        status: '',
-    });
+const AddCourse = ({ courses, setCourses, formData, setFormData, id }) => {
+
     const [message, setMessage] = useState({
         error: false,
         body: '',
@@ -27,27 +23,37 @@ const AddCourse = ({ courses, setCourses }) => {
                 error: true,
                 body: 'All fields are required.'
             })
+            fetchCourses();
         }
         else {
             try {
-                CourseService.addCourse(formData)
-                setMessage({
-                    error: false,
-                    body: 'Course added successfully.'
-                })
-                fetchCourses()
-                setFormData({
-                    title: '',
-                    instructor: '',
-                    status: '',
-                })
+                if (id) {
+                    CourseService.updateCourse(id, formData);
+                    setMessage({
+                        error: false,
+                        body: 'Course updated successfully.'
+                    })
+                }
+                else {
+                    CourseService.addCourse(formData)
+                    setMessage({
+                        error: false,
+                        body: 'Course added successfully.'
+                    })
+                    fetchCourses()
+                    setFormData({
+                        title: '',
+                        instructor: '',
+                        status: '',
+                    })
+                }
             }
             catch (error) {
 
             }
         }
     }
-    console.log(message.error)
+    console.log(id)
     return (
         <div className='mt-5'>
             <form onSubmit={handleSubmit} className='mx-auto w-2/3 p-5 shadow-md rounded-md'>
@@ -98,7 +104,7 @@ const AddCourse = ({ courses, setCourses }) => {
                         name="unavailable"
                         id="unavailable" />
                 </div>
-                <button className='btn btn-primary focus:ring-4 ring-cyan-500 ring-offset-1 mt-5' type='submit'>Add Course</button>
+                <button className='btn btn-primary focus:ring-4 ring-cyan-500 ring-offset-1 mt-5' type='submit'>{id !== null ? 'Update Course' : 'Add Course'}</button>
             </form>
         </div>
     );

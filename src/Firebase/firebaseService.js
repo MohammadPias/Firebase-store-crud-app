@@ -30,7 +30,7 @@ class CourseService {
         return getDocs(courseCollection)
     };
     getCourse = (id) => {
-        const courseDoc = doc(db, 'courses')
+        const courseDoc = doc(db, 'courses', id)
         return getDoc(courseDoc)
     }
 }
